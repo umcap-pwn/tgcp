@@ -1,3 +1,7 @@
+env/
+*.secrets
+misc/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -171,4 +175,4 @@ cython_debug/
 .ruff_cache/
 
 # PyPI configuration file
-.pypirc
+
