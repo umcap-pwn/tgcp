@@ -1,6 +1,5 @@
 #! ../venv/bin/python
 
-
 import colorlog
 from telegram import Bot
 from utils import PersistentMessage
@@ -8,6 +7,7 @@ from monitor import get_system_status
 import logging
 import asyncio
 
+logging.getLogger('httpx').setLevel(logging.WARNING)
 
 handler = colorlog.StreamHandler()
 handler.setFormatter(colorlog.ColoredFormatter(
@@ -17,7 +17,7 @@ handler.setFormatter(colorlog.ColoredFormatter(
         'INFO':     'bold_blue',
         'WARNING':  'bold_yellow',
         'ERROR':    'bold_red',
-        'CRITICAL': 'bold_red,bg_yellow'
+        'CRITICAL': 'bold_red,bg_white'
     }
 ))
 
@@ -29,9 +29,14 @@ logging.basicConfig(
 TOKEN = ""
 CHAT_ID = None
 
+
 async def main():
     try:
-        bot = Bot(TOKEN)
+        if TOKEN and CHAT_ID:
+            bot = Bot(TOKEN)
+        else:
+            logging.fatal("Для работы бота необходимо предоставить ID чата и токен бота.")
+            return
         panel = PersistentMessage(bot, CHAT_ID)
         await panel.initialize("Контрольная панель запущена")
 

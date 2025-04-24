@@ -1,4 +1,3 @@
-import asyncio
 from telegram import Bot
 from telegram.error import TelegramError
 import logging
@@ -10,17 +9,16 @@ class PersistentMessage():
         self.chat_id = chat_id
         self.message_id = None
         self.msg = None
+        self.logger = logging.getLogger()
+        
 
-    
-
-    
     async def initialize(self, initial_message: str = "Инициализация бота..."):
         await self._create_initial_message(initial_message)
         return self
 
-    
 
-    
+
+
     async def _create_initial_message(self, message: str):
         try:
             self.msg = await self.bot.send_message(
@@ -31,12 +29,11 @@ class PersistentMessage():
             self.text = message
             self.message_id = self.msg.message_id
         except TelegramError as e:
-            print(e)
-            logging.error(f"Не удается отправить начальное сообщение: {e}")
+            self.logger.error(f"Не удается отправить начальное сообщение: {e}")
 
-    
 
-    
+
+
     async def update_text(self, new_text: str):
         if new_text == self.text:
             return
@@ -51,13 +48,14 @@ class PersistentMessage():
                 self.text = new_text
         except TelegramError as e:
             if "Message to edit not found" in str(e):
-                await self._create_initial_message("...") 
+                self.logger.warning("Сообщение не найдено, создаю новое...")
+                await self._create_initial_message("...")
             else:
-                logging.warning(f"Не удается обновить сообщение: {e}.")
+                self.logger.warning(f"Не удается обновить сообщение: {e}")
 
-    
 
-    
+
+
     async def clear(self):
         try:
             if self.msg:
@@ -68,9 +66,9 @@ class PersistentMessage():
                 self.text = None
                 self.msg = None
         except TelegramError as e:
-            logging.error(f"Не удается удалить сообщение: {e}")
-                
-    
+            self.logger.error(f"Не удается удалить сообщение: {e}")
+
+
 
 
 
