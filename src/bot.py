@@ -4,6 +4,8 @@ import colorlog
 from telegram import Bot
 from utils import PersistentMessage
 from monitor import get_system_status
+from dotenv import load_dotenv
+import os
 import logging
 import asyncio
 
@@ -21,21 +23,35 @@ handler.setFormatter(colorlog.ColoredFormatter(
     }
 ))
 
+
+
+
 logging.basicConfig(
     level=logging.INFO,
     handlers=[handler]
 )
 
-TOKEN = ""
-CHAT_ID = None
+BOT_CHAT_ID = None
+BOT_TOKEN = None
 
 
 async def main():
     try:
-        if TOKEN and CHAT_ID:
+        BOT_TOKEN = os.getenv("BOT_TOKEN")
+        BOT_CHAT_ID = os.getenv("BOT_CHAT_ID")
+        if BOT_TOKEN and BOT_CHAT_ID:
             bot = Bot(TOKEN)
         else:
-            logging.fatal("Для работы бота необходимо предоставить ID чата и токен бота.")
+            logging.info("Для работы бота необходимо предоставить ID чата и токен бота.")
+            logging.info("Введите токен бота:")
+            _ = input().strip() 
+            BOT_TOKEN =  _ if ":" in _ and len(_) > 30 else None
+            
+            logging.info("Введите ID чата:")
+            BOT_CHAT_ID = int(input())
+            if BOT_CHAT_ID and BOT_TOKEN:
+                set_key(env_path, "BOT_CHAT_ID",str(BOT_CHAT_ID))
+                set_key(env_path, "BOT_TOKEN", str(BOT_TOKEN))
             return
         panel = PersistentMessage(bot, CHAT_ID)
         await panel.initialize("Контрольная панель запущена")
